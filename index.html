@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bell 412 EP PK-TWV Weight & Balance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #10101E 0%, #161625 50%, #1C1C2D 100%);
+            color: #EAEAEA;
+            min-height: 100vh;
+        }
+
+        .modern-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modern-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            color: #FFFFFF;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        
+        .modern-input::-webkit-outer-spin-button,
+        .modern-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .modern-input:focus {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .result-field {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .floating-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Glossy scrolled header */
+        .header-scrolled {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-xl w-full mx-auto">
+        <!-- Header Section -->
+        <header id="app-header" class="sticky top-0 z-50 py-4 transition-all duration-300 -mx-4 px-4">
+            <div class="text-center">
+                <div class="floating-icon text-5xl mb-2 inline-block">🚁</div>
+                <h1 class="text-3xl font-bold text-white">Bell 412 EP PK-TWV</h1>
+                <p class="text-yellow-400/80 font-medium">Weight & Balance Calculator</p>
+                <p class="text-white/50 text-xs font-medium mt-1">Made by Capt. Ramdan / Siera 7315</p>
+            </div>
+        </header>
+
+        <main class="space-y-6 mt-6">
+            <!-- Density Altitude Calculator Card -->
+            <div class="modern-card rounded-2xl p-6">
+                <h2 class="font-bold text-white mb-4 text-lg flex items-center">
+                    <span class="w-3 h-3 bg-yellow-400 rounded-full mr-3"></span>
+                    Density Altitude Calculator
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-yellow-400 mb-1">🌡️ Temperature (°C)</label>
+                        <input type="number" id="temperature" value="15" class="modern-input w-full p-3 rounded-lg font-bold text-base">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-yellow-400 mb-1">🏔️ Pressure Altitude (ft)</label>
+                        <input type="number" id="pressureAltitude" value="0" class="modern-input w-full p-3 rounded-lg font-bold text-base">
+                    </div>
+                </div>
+                <div class="mt-4 bg-gradient-to-r from-yellow-900/50 to-amber-800/50 rounded-lg p-3 border border-yellow-600">
+                    <div class="flex justify-between items-center">
+                        <span class="text-yellow-300 font-medium text-base">Density Altitude:</span>
+                        <span class="font-bold text-yellow-200 text-lg" id="densityAltitudeResult">0 ft</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight & Flight Calculation Card -->
+            <div class="modern-card rounded-2xl p-6 space-y-4">
+                <h2 class="font-bold text-white mb-4 text-lg flex items-center">
+                    <span class="w-3 h-3 bg-cyan-400 rounded-full mr-3"></span>
+                    Weight & Flight Calculation
+                </h2>
+                
+                <!-- Aircraft Base Weights -->
+                <div class="border-b border-gray-700/50 pb-4">
+                    <h3 class="font-bold text-white mb-3 text-md flex items-center">
+                        <span class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></span>
+                        Aircraft Weight
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">⚖️ Maximum Gross Weight (lbs)</label>
+                            <input type="number" id="maxGrossWeight" value="11900" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">⚖️ Empty Weight (lbs)</label>
+                            <input type="number" id="emptyWeight" value="7950" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                    </div>
+                     <!-- Crew & Baggage Weights -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">👨‍✈️ Pilot (kg)</label>
+                            <input type="number" id="pilotWeight" value="90" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">👨‍✈️ Co-pilot (kg)</label>
+                            <input type="number" id="copilotWeight" value="90" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">👷‍♂️ Engineer (kg)</label>
+                            <input type="number" id="engineerWeight" value="90" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                         <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">🧳 Baggage in Tail (kg)</label>
+                            <input type="number" id="baggageWeight" value="30" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Flight Time Calculation Section -->
+                <div class="pt-4 border-b border-gray-700/50 pb-4">
+                     <h3 class="font-bold text-white mb-3 text-md flex items-center">
+                        <span class="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
+                        Flight Time Calculation
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">🕒 Trip Hours</label>
+                                <input type="number" id="tripHours" value="2" min="0" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1">🕒 Trip Mins</label>
+                                <input type="number" id="tripMinutes" value="30" min="0" max="59" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                            </div>
+                        </div>
+                        <div>
+                             <label class="block text-xs font-semibold text-gray-300 mb-1">⛽ Fuel Onboard (lbs)</label>
+                            <input type="number" id="fuelOnboard" value="2000" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">🔥 Fuel Consumption (lbs/hr)</label>
+                            <input type="number" id="fuelConsumption" value="820" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">✈️ Airspeed (kts)</label>
+                            <input type="number" id="airspeed" value="110" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                         <div class="flex items-center p-2 rounded-lg result-field">
+                            <span class="font-semibold text-gray-300 text-sm mr-2">Fuel Trip:</span>
+                            <span class="font-bold text-white text-md" id="fuelTripResult">0 lbs</span>
+                        </div>
+                        <div class="flex items-center p-2 rounded-lg result-field">
+                            <span class="font-semibold text-gray-300 text-sm mr-2">Max Range:</span>
+                            <span class="font-bold text-white text-md" id="maxRangeResult">0 nm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fuel Required Section -->
+                <div class="pt-4">
+                     <h3 class="font-bold text-white mb-3 text-md flex items-center">
+                        <span class="w-2 h-2 bg-orange-400 rounded-full mr-3"></span>
+                        Fuel Required
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between items-center p-2 rounded-lg result-field">
+                            <span>Fuel Reserve (20 min):</span>
+                            <span class="font-semibold" id="fuelReserveResult">0 lbs</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg result-field">
+                            <span>Fuel Contingency (10%):</span>
+                            <span class="font-semibold" id="fuelContingencyResult">0 lbs</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg result-field">
+                            <span>Fuel Start Engine:</span>
+                            <span class="font-semibold" id="fuelStartEngineResult">0 lbs</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded-lg result-field">
+                            <span>Fuel Air Taxi:</span>
+                            <span class="font-semibold" id="fuelAirTaxiResult">0 lbs</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 mt-2 rounded-lg bg-orange-900/40 border border-orange-500/50">
+                            <span class="font-bold text-orange-300">Total Fuel Required:</span>
+                            <span class="font-bold text-orange-300" id="totalFuelRequiredResult">0 lbs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seat Layout & CG Table Card -->
+            <div class="modern-card rounded-2xl p-6">
+                <h2 class="font-bold text-white mb-4 text-lg flex items-center">
+                    <span class="w-3 h-3 bg-purple-400 rounded-full mr-3"></span>
+                    Seat Layout & CG Calculation
+                </h2>
+                <div class="bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+                    <!-- Cockpit -->
+                    <div class="text-center text-xs font-bold text-yellow-400 mb-2">COCKPIT</div>
+                    <div class="flex justify-center space-x-8 mb-4">
+                        <div class="text-center">
+                            <div class="w-14 h-14 bg-cyan-800/50 rounded-lg border-2 border-cyan-500 flex items-center justify-center text-cyan-300 font-bold" id="copilotSeatDisplay">0</div>
+                            <div class="text-xs mt-1">Co-pilot (kg)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-14 h-14 bg-blue-800/50 rounded-lg border-2 border-blue-500 flex items-center justify-center text-blue-300 font-bold" id="pilotSeatDisplay">0</div>
+                            <div class="text-xs mt-1">Pilot (kg)</div>
+                        </div>
+                    </div>
+
+                    <!-- Passenger Cabin -->
+                    <div class="text-center text-xs font-bold text-yellow-400 mb-2">PASSENGER CABIN</div>
+                    <!-- Rear Facing Seats -->
+                    <div class="flex justify-center space-x-2 mb-3">
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="4"><div class="text-xs text-gray-400 mt-1">4</div></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="3"><div class="text-xs text-gray-400 mt-1">3</div></div>
+                        <div class="w-4"></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="2"><div class="text-xs text-gray-400 mt-1">2</div></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="1"><div class="text-xs text-gray-400 mt-1">1</div></div>
+                    </div>
+                    <!-- Forward Facing Seats -->
+                    <div class="flex justify-center space-x-2 mb-4">
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="8"><div class="text-xs text-gray-400 mt-1">8</div></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="7"><div class="text-xs text-gray-400 mt-1">7</div></div>
+                        <div class="w-4"></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="6"><div class="text-xs text-gray-400 mt-1">6</div></div>
+                        <div class="text-center"><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="5"><div class="text-xs text-gray-400 mt-1">5</div></div>
+                    </div>
+
+                    <!-- Aft Section -->
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="flex flex-col space-y-2 text-center">
+                            <div><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="10"><div class="text-xs text-gray-400 mt-1">10</div></div>
+                            <div><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="9"><div class="text-xs text-gray-400 mt-1">9</div></div>
+                        </div>
+                        <div class="w-16 h-24 bg-gray-700/60 rounded-lg flex items-center justify-center text-gray-400 font-bold text-sm">XMSN</div>
+                        <div class="flex flex-col space-y-2 text-center">
+                             <div class="text-center">
+                                <div class="w-12 h-10 bg-red-800/50 rounded-md border-2 border-red-500 flex items-center justify-center text-red-300 font-bold" id="engineerSeatDisplay">0</div>
+                                <div class="text-xs text-gray-400 mt-1">11 (Eng)</div>
+                             </div>
+                             <div><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="12"><div class="text-xs text-gray-400 mt-1">12</div></div>
+                        </div>
+                    </div>
+
+                    <!-- Baggage Section -->
+                     <div class="text-center text-xs font-bold text-yellow-400 mb-2">TAIL SECTION</div>
+                     <div class="relative h-8 w-full bg-gray-700 rounded-lg overflow-hidden border border-gray-600">
+                        <div id="baggageFill" class="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-500"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="font-bold text-white text-sm" id="baggageDisplay">0 kg / 200 kg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payload Information -->
+                <div class="mt-4 pt-4 border-t border-gray-700/50">
+                     <h3 class="font-bold text-white mb-3 text-md flex items-center">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full mr-3"></span>
+                        Payload Information
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-2 rounded-lg result-field">
+                            <span class="font-semibold text-gray-300">Available Payload:</span>
+                            <span class="font-bold text-white" id="availablePayloadDisplay">0 lbs / 0 kg</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">🧍‍♂️ Assumed Passenger Weight (kg)</label>
+                            <input type="number" id="assumedPaxWeight" value="75" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-lg bg-blue-900/40 border border-blue-500/50">
+                            <span class="font-bold text-blue-300">Passengers to Carry:</span>
+                            <span class="font-bold text-blue-300 text-lg" id="paxToCarryDisplay">0 orang</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CG Calculation Table -->
+                <div class="mt-4 overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead>
+                            <tr class="bg-gray-800/50">
+                                <th class="p-2 font-semibold">Item</th>
+                                <th class="p-2 font-semibold text-center">Weight (lbs)</th>
+                                <th class="p-2 font-semibold text-center">ARM</th>
+                                <th class="p-2 font-semibold text-center">Moment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cg-table-body">
+                            <!-- Rows will be generated by JavaScript -->
+                        </tbody>
+                        <tfoot id="cg-table-foot">
+                            <!-- Totals will be generated by JavaScript -->
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- CG Envelope Chart -->
+                <div class="mt-6">
+                    <h3 class="font-bold text-white mb-3 text-md flex items-center">
+                        <span class="w-2 h-2 bg-pink-400 rounded-full mr-3"></span>
+                        Center of Gravity Envelope
+                    </h3>
+                    <div class="relative bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                        <svg id="cg-chart" viewBox="0 0 500 350" class="w-full h-auto"></svg>
+                        <div id="cg-status-container" class="mt-4 space-y-2 text-xs"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Final Status Card -->
+            <div class="modern-card rounded-2xl p-6 space-y-4">
+                 <h2 class="font-bold text-white mb-4 text-lg flex items-center">
+                    <span class="w-3 h-3 bg-teal-400 rounded-full mr-3"></span>
+                    Final Status
+                </h2>
+                <div class="space-y-3 pt-4">
+                     <div class="flex justify-between items-center p-3 rounded-lg result-field">
+                        <span class="font-semibold text-gray-300">Final Takeoff Weight:</span>
+                        <span class="font-bold text-white text-lg" id="finalTakeoffWeightResult">0 lbs</span>
+                    </div>
+                </div>
+                <div id="status-banner" class="mt-4 p-4 rounded-lg transition-all duration-300">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold text-base" id="status-text"></span>
+                        <span class="font-bold text-xl" id="status-payload"></span>
+                    </div>
+                     <p class="text-xs mt-1" id="status-desc"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            const seatInputs = document.querySelectorAll('.seat-input');
+            
+            const momentTables = {
+                pilot: { 100: 4700, 110: 5170, 120: 5640, 130: 6110, 140: 6580, 150: 7050, 160: 7520, 170: 7990, 180: 8460, 190: 8930, 200: 9400, 210: 9870, 220: 10340 },
+                copilot: { 100: 4700, 110: 5170, 120: 5640, 130: 6110, 140: 6580, 150: 7050, 160: 7520, 170: 7990, 180: 8460, 190: 8930, 200: 9400, 210: 9870, 220: 10340 },
+                seats1_4: { 100: 8700, 110: 9570, 120: 10440, 130: 11310, 140: 12180, 150: 13050, 160: 13920, 170: 14790, 180: 15660, 190: 16500, 200: 17400, 210: 18270, 220: 19140 },
+                seats5_8: { 100: 11700, 110: 12870, 120: 14040, 130: 15210, 140: 16380, 150: 17550, 160: 18720, 170: 19890, 180: 21060, 190: 22230, 200: 23400, 210: 24570, 220: 25740 },
+                seats9_10: { 100: 13900, 110: 15290, 120: 16680, 130: 18070, 140: 19460, 150: 20850, 160: 22240, 170: 23630, 180: 25020, 190: 26410, 200: 27800, 210: 29190, 220: 30580 },
+                seats11_12: { 100: 15600, 110: 17160, 120: 18720, 130: 20280, 140: 21840, 150: 23400, 160: 24960, 170: 26520, 180: 28080, 190: 29640, 200: 31200, 210: 32760, 220: 34320 },
+                baggage: { 10: 2430, 20: 4900, 40: 9880, 60: 14940, 80: 20080, 100: 25300, 120: 30600, 140: 65980, 160: 41440, 180: 46980, 200: 52600, 220: 58300, 240: 64080, 260: 69940, 280: 75880, 300: 81900, 320: 88000, 340: 94180, 360: 100440, 380: 106780, 400: 113200 },
+                fuel: { 68: 9479, 136: 18386, 204: 28519, 272: 38053, 340: 47566, 394: 55540, 408: 57569, 476: 69496, 544: 81491, 612: 93452, 680: 105400, 748: 117286, 816: 129173, 884: 141175, 952: 153177, 1020: 159528, 1088: 165811, 1156: 172244, 1177: 174196, 1224: 182376, 1292: 194317, 1360: 206176, 1428: 218198, 1496: 230234, 1564: 241951, 1632: 254102, 1653: 257703, 1700: 263160, 1768: 270858, 1836: 278705, 1904: 286362, 1972: 294025, 2007: 298240, 2040: 303690, 2108: 315989, 2176: 327923, 2244: 339742, 2247: 340421 }
+            };
+
+            const calculateAll = () => {
+                updateSeatLayout();
+                const fuelTrip = calculateFlightTime(); 
+                const cgData = calculateWeightsAndCG(fuelTrip);
+                updateCGChart(cgData);
+                calculateDensityAltitude();
+            };
+
+            const updateSeatLayout = () => {
+                const pilotKg = parseFloat(document.getElementById('pilotWeight').value) || 0;
+                const copilotKg = parseFloat(document.getElementById('copilotWeight').value) || 0;
+                const engineerKg = parseFloat(document.getElementById('engineerWeight').value) || 0;
+                const baggageKg = parseFloat(document.getElementById('baggageWeight').value) || 0;
+
+                document.getElementById('pilotSeatDisplay').textContent = pilotKg;
+                document.getElementById('copilotSeatDisplay').textContent = copilotKg;
+                document.getElementById('engineerSeatDisplay').textContent = engineerKg;
+                
+                const maxBaggage = 200;
+                const baggageFill = document.getElementById('baggageFill');
+                const baggageDisplay = document.getElementById('baggageDisplay');
+                
+                const baggagePercent = Math.min((baggageKg / maxBaggage) * 100, 100);
+                baggageFill.style.width = `${baggagePercent}%`;
+                baggageDisplay.textContent = `${baggageKg} kg / ${maxBaggage} kg`;
+
+                if (baggageKg > maxBaggage) {
+                    baggageFill.classList.remove('from-yellow-600', 'to-yellow-400');
+                    baggageFill.classList.add('from-red-600', 'to-red-400');
+                } else {
+                    baggageFill.classList.remove('from-red-600', 'to-red-400');
+                    baggageFill.classList.add('from-yellow-600', 'to-yellow-400');
+                }
+            };
+            
+            const calculateDensityAltitude = () => {
+                const tempC = parseFloat(document.getElementById('temperature').value) || 0;
+                const pressureAlt = parseFloat(document.getElementById('pressureAltitude').value) || 0;
+                const isaTempC = 15 - (pressureAlt / 1000) * 1.98;
+                const densityAltitude = pressureAlt + (120 * (tempC - isaTempC));
+                document.getElementById('densityAltitudeResult').textContent = `${Math.round(densityAltitude).toLocaleString()} ft`;
+            };
+
+            const calculateFlightTime = () => {
+                const tripHours = parseFloat(document.getElementById('tripHours').value) || 0;
+                const tripMinutes = parseFloat(document.getElementById('tripMinutes').value) || 0;
+                const fuelConsumption = parseFloat(document.getElementById('fuelConsumption').value) || 0;
+                const airspeed = parseFloat(document.getElementById('airspeed').value) || 0;
+                const fuelOnboard = parseFloat(document.getElementById('fuelOnboard').value) || 0;
+
+                const totalTripTimeInHours = tripHours + (tripMinutes / 60);
+                const fuelTrip = totalTripTimeInHours * fuelConsumption;
+                document.getElementById('fuelTripResult').textContent = `${Math.round(fuelTrip).toLocaleString()} lbs`;
+
+                let maxRange = 0;
+                if (fuelConsumption > 0) maxRange = (fuelOnboard / fuelConsumption) * airspeed;
+                document.getElementById('maxRangeResult').textContent = `${Math.round(maxRange).toLocaleString()} nm`;
+
+                const fuelReserve = 12.5 * 20;
+                const fuelContingency = fuelTrip * 0.10;
+                const fuelStartEngine = 125;
+                const fuelAirTaxi = 125;
+                const totalFuelRequired = fuelTrip + fuelContingency + fuelStartEngine + fuelAirTaxi;
+
+                document.getElementById('fuelReserveResult').textContent = `${Math.round(fuelReserve).toLocaleString()} lbs`;
+                document.getElementById('fuelContingencyResult').textContent = `${Math.round(fuelContingency).toLocaleString()} lbs`;
+                document.getElementById('fuelStartEngineResult').textContent = `${Math.round(fuelStartEngine).toLocaleString()} lbs`;
+                document.getElementById('fuelAirTaxiResult').textContent = `${Math.round(fuelAirTaxi).toLocaleString()} lbs`;
+                document.getElementById('totalFuelRequiredResult').textContent = `${Math.round(totalFuelRequired).toLocaleString()} lbs`;
+                
+                return fuelTrip;
+            };
+
+            const getMomentFromTable = (weightLbs, table) => {
+                if (weightLbs <= 0) return 0;
+                const weights = Object.keys(table).map(Number).sort((a, b) => a - b);
+                if (weightLbs <= weights[0]) return table[weights[0]];
+                if (weightLbs >= weights[weights.length - 1]) return table[weights[weights.length - 1]];
+                let lowerWeight = weights[0], upperWeight = weights[weights.length - 1];
+                for (let i = 0; i < weights.length - 1; i++) {
+                    if (weightLbs >= weights[i] && weightLbs < weights[i+1]) {
+                        lowerWeight = weights[i];
+                        upperWeight = weights[i+1];
+                        break;
+                    }
+                }
+                const lowerMoment = table[lowerWeight];
+                const upperMoment = table[upperWeight];
+                const ratio = (weightLbs - lowerWeight) / (upperWeight - lowerWeight);
+                return lowerMoment + (ratio * (upperMoment - lowerMoment));
+            };
+
+            const calculateWeightsAndCG = (fuelTrip) => {
+                const kgToLbs = 2.20462;
+                const tableBody = document.getElementById('cg-table-body');
+                const tableFoot = document.getElementById('cg-table-foot');
+                tableBody.innerHTML = '';
+                tableFoot.innerHTML = '';
+                let bowWeight = 0, bowMoment = 0;
+
+                const addRowToTable = (targetElement, item, weight, moment, isTotal = false, colorClass = '') => {
+                    const arm = weight > 0 ? moment / weight : 0;
+                    const row = document.createElement('tr');
+                    row.className = isTotal ? `font-bold ${colorClass}` : 'border-b border-gray-800';
+                    row.innerHTML = `<td class="p-2">${item}</td><td class="p-2 text-center">${Math.round(weight).toLocaleString()}</td><td class="p-2 text-center">${arm.toFixed(1)}</td><td class="p-2 text-center">${Math.round(moment).toLocaleString()}</td>`;
+                    targetElement.appendChild(row);
+                    return { weight, arm, moment };
+                };
+
+                let items = [];
+                const emptyWeight = parseFloat(document.getElementById('emptyWeight').value) || 0;
+                items.push({name: 'Empty Weight', weight: emptyWeight, moment: emptyWeight * 140.2});
+                items.push({name: 'Oil', weight: 25, moment: 25 * 169.1});
+                const pilotWeightLbs = (parseFloat(document.getElementById('pilotWeight').value) || 0) * kgToLbs;
+                items.push({name: 'Pilot', weight: pilotWeightLbs, moment: getMomentFromTable(pilotWeightLbs, momentTables.pilot)});
+                const copilotWeightLbs = (parseFloat(document.getElementById('copilotWeight').value) || 0) * kgToLbs;
+                items.push({name: 'Co-Pilot', weight: copilotWeightLbs, moment: getMomentFromTable(copilotWeightLbs, momentTables.copilot)});
+                const engineerWeightLbs = (parseFloat(document.getElementById('engineerWeight').value) || 0) * kgToLbs;
+                items.push({name: 'Seat 11 (Engineer)', weight: engineerWeightLbs, moment: getMomentFromTable(engineerWeightLbs, momentTables.seats11_12)});
+
+                seatInputs.forEach(input => {
+                    const seatNum = parseInt(input.dataset.seat);
+                    const weightKg = parseFloat(input.value) || 0;
+                    if (weightKg > 0) {
+                        const weightLbs = weightKg * kgToLbs;
+                        let table;
+                        if (seatNum <= 4) table = momentTables.seats1_4;
+                        else if (seatNum <= 8) table = momentTables.seats5_8;
+                        else if (seatNum <= 10) table = momentTables.seats9_10;
+                        else if (seatNum === 12) table = momentTables.seats11_12;
+                        if(table) items.push({name: `Seat ${seatNum}`, weight: weightLbs, moment: getMomentFromTable(weightLbs, table)});
+                    }
+                });
+
+                const baggageWeightLbs = (parseFloat(document.getElementById('baggageWeight').value) || 0) * kgToLbs;
+                items.push({name: 'Baggage', weight: baggageWeightLbs, moment: getMomentFromTable(baggageWeightLbs, momentTables.baggage)});
+                
+                items.forEach(item => addRowToTable(tableBody, item.name, item.weight, item.moment));
+                
+                bowWeight = items.reduce((sum, item) => sum + item.weight, 0);
+                bowMoment = items.reduce((sum, item) => sum + item.moment, 0);
+                
+                addRowToTable(tableFoot, 'Basic Operating Weight (BOW)', bowWeight, bowMoment, true, 'bg-teal-800/30');
+
+                const fuelOnboard = parseFloat(document.getElementById('fuelOnboard').value) || 0;
+                const takeoffFuelWeight = Math.max(0, fuelOnboard - 100);
+                const takeoffFuelMoment = getMomentFromTable(takeoffFuelWeight, momentTables.fuel);
+                addRowToTable(tableFoot, 'Takeoff Fuel', takeoffFuelWeight, takeoffFuelMoment);
+
+                const tow = addRowToTable(tableFoot, 'TAKEOFF WEIGHT (TOW)', bowWeight + takeoffFuelWeight, bowMoment + takeoffFuelMoment, true, 'bg-orange-800/30');
+
+                const fwdFuelWeight = 379, fwdFuelMoment = 53022.0;
+                addRowToTable(tableFoot, 'Fwd Fuel (220.7 ltr)', fwdFuelWeight, fwdFuelMoment);
+                const mfc = addRowToTable(tableFoot, 'Most Forward Condition (MFC)', bowWeight + fwdFuelWeight, bowMoment + fwdFuelMoment, true, 'bg-purple-800/30');
+                
+                const landingFuelWeight = Math.max(0, takeoffFuelWeight - fuelTrip);
+                const landingFuelMoment = getMomentFromTable(landingFuelWeight, momentTables.fuel);
+                addRowToTable(tableFoot, 'Landing Fuel', landingFuelWeight, landingFuelMoment);
+                const lw = addRowToTable(tableFoot, 'Landing Condition (LW)', bowWeight + landingFuelWeight, bowMoment + landingFuelMoment, true, 'bg-indigo-800/30');
+
+                const maxGrossWeight = parseFloat(document.getElementById('maxGrossWeight').value) || 0;
+                const statusBanner = document.getElementById('status-banner');
+                const statusText = document.getElementById('status-text');
+                const statusPayload = document.getElementById('status-payload');
+                const statusDesc = document.getElementById('status-desc');
+                const remainingPayload = maxGrossWeight - tow.weight;
+                
+                document.getElementById('finalTakeoffWeightResult').textContent = `${Math.round(tow.weight).toLocaleString()} lbs`;
+
+                if (remainingPayload >= 0) {
+                    statusBanner.className = 'mt-4 p-4 rounded-lg bg-gradient-to-r from-green-900/50 to-teal-800/50 border border-green-500';
+                    statusText.textContent = 'Within Limits';
+                    statusDesc.textContent = 'Remaining payload available.';
+                    statusPayload.textContent = `+${Math.round(remainingPayload).toLocaleString()} lbs`;
+                } else {
+                    statusBanner.className = 'mt-4 p-4 rounded-lg bg-gradient-to-r from-red-900/50 to-rose-800/50 border border-red-500';
+                    statusText.textContent = 'Overweight';
+                    statusDesc.textContent = 'Reduce weight to meet limits.';
+                    statusPayload.textContent = `${Math.round(remainingPayload).toLocaleString()} lbs`;
+                }
+                
+                // Payload Calculation
+                const availablePayloadLbs = remainingPayload;
+                const availablePayloadKg = availablePayloadLbs / kgToLbs;
+                document.getElementById('availablePayloadDisplay').textContent = `${Math.round(availablePayloadLbs).toLocaleString()} lbs / ${Math.round(availablePayloadKg).toLocaleString()} kg`;
+
+                const assumedPaxWeight = parseFloat(document.getElementById('assumedPaxWeight').value) || 75;
+                let paxToCarry = 0;
+                if (assumedPaxWeight > 0 && availablePayloadKg > 0) {
+                    paxToCarry = Math.floor(availablePayloadKg / assumedPaxWeight);
+                }
+                document.getElementById('paxToCarryDisplay').textContent = `${paxToCarry} orang`;
+
+                return { tow, mfc, lw };
+            };
+
+            const updateCGChart = (cgData) => {
+                const { tow, mfc, lw } = cgData;
+                const svgNS = "http://www.w3.org/2000/svg";
+                const chart = document.getElementById('cg-chart');
+                chart.innerHTML = ''; // Clear previous chart
+
+                const viewBox = { x: 0, y: 0, width: 500, height: 350 };
+                const margins = { top: 20, right: 20, bottom: 50, left: 60 };
+                const chartWidth = viewBox.width - margins.left - margins.right;
+                const chartHeight = viewBox.height - margins.top - margins.bottom;
+
+                const weightMin = 6000, weightMax = 12800;
+                const cgMin = 129, cgMax = 145;
+
+                const xScale = (cg) => margins.left + ((cg - cgMin) / (cgMax - cgMin)) * chartWidth;
+                const yScale = (w) => margins.top + chartHeight - ((w - weightMin) / (weightMax - weightMin)) * chartHeight;
+
+                // Draw grid lines and labels
+                for (let i = 0; i <= 17; i++) { // Adjusted for 400 lbs increments
+                    const weight = weightMin + i * 400;
+                    if(weight > weightMax) continue;
+                    const y = yScale(weight);
+                    const line = document.createElementNS(svgNS, 'line');
+                    line.setAttribute('x1', margins.left);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', margins.left + chartWidth);
+                    line.setAttribute('y2', y);
+                    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+                    chart.appendChild(line);
+
+                    const text = document.createElementNS(svgNS, 'text');
+                    text.setAttribute('x', margins.left - 8);
+                    text.setAttribute('y', y + 3);
+                    text.setAttribute('fill', '#9ca3af');
+                    text.setAttribute('font-size', '10');
+                    text.setAttribute('text-anchor', 'end');
+                    text.textContent = weight.toLocaleString();
+                    chart.appendChild(text);
+                }
+                 for (let cg = cgMin; cg <= cgMax; cg++) {
+                    const x = xScale(cg);
+                    const line = document.createElementNS(svgNS, 'line');
+                    line.setAttribute('x1', x);
+                    line.setAttribute('y1', margins.top);
+                    line.setAttribute('x2', x);
+                    line.setAttribute('y2', margins.top + chartHeight);
+                    line.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+                    chart.appendChild(line);
+
+                    const text = document.createElementNS(svgNS, 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', margins.top + chartHeight + 15);
+                    text.setAttribute('fill', '#9ca3af');
+                    text.setAttribute('font-size', '10');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.textContent = cg;
+                    chart.appendChild(text);
+                }
+
+                // Axis Titles
+                const yAxisTitle = document.createElementNS(svgNS, 'text');
+                yAxisTitle.setAttribute('transform', `rotate(-90)`);
+                yAxisTitle.setAttribute('y', 15);
+                yAxisTitle.setAttribute('x', -(margins.top + chartHeight / 2));
+                yAxisTitle.setAttribute('fill', '#e5e7eb');
+                yAxisTitle.setAttribute('font-size', '12');
+                yAxisTitle.setAttribute('text-anchor', 'middle');
+                yAxisTitle.textContent = 'GROSS WEIGHT (LBS)';
+                chart.appendChild(yAxisTitle);
+
+                const xAxisTitle = document.createElementNS(svgNS, 'text');
+                xAxisTitle.setAttribute('x', margins.left + chartWidth / 2);
+                xAxisTitle.setAttribute('y', viewBox.height - 10);
+                xAxisTitle.setAttribute('fill', '#e5e7eb');
+                xAxisTitle.setAttribute('font-size', '12');
+                xAxisTitle.setAttribute('text-anchor', 'middle');
+                xAxisTitle.textContent = 'Longitudinal C.G. Fuselage STA (in)';
+                chart.appendChild(xAxisTitle);
+
+                // Draw Envelope
+                const envelopePoints = [
+                    {cg: 130, weight: 6400}, {cg: 130, weight: 8800}, {cg: 135, weight: 11900},
+                    {cg: 141, weight: 11900}, {cg: 144, weight: 8800}, {cg: 144, weight: 6400}, {cg: 130, weight: 6400}
+                ];
+                const polyline = document.createElementNS(svgNS, 'polyline');
+                const pointsStr = envelopePoints.map(p => `${xScale(p.cg)},${yScale(p.weight)}`).join(' ');
+                polyline.setAttribute('points', pointsStr);
+                polyline.setAttribute('fill', 'rgba(34, 197, 94, 0.1)');
+                polyline.setAttribute('stroke', '#22c55e');
+                polyline.setAttribute('stroke-width', '2');
+                chart.appendChild(polyline);
+
+                // Draw data points
+                const drawPoint = (point, color, label) => {
+                    const circle = document.createElementNS(svgNS, 'circle');
+                    circle.setAttribute('cx', xScale(point.arm));
+                    circle.setAttribute('cy', yScale(point.weight));
+                    circle.setAttribute('r', '5');
+                    circle.setAttribute('fill', color);
+                    chart.appendChild(circle);
+
+                    const text = document.createElementNS(svgNS, 'text');
+                    text.setAttribute('x', xScale(point.arm) + 8);
+                    text.setAttribute('y', yScale(point.weight) + 4);
+                    text.setAttribute('fill', color);
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('font-weight', 'bold');
+                    text.textContent = label;
+                    chart.appendChild(text);
+                };
+                
+                drawPoint(mfc, '#a855f7', 'MFC');
+                drawPoint(tow, '#f97316', 'TOW');
+                drawPoint(lw, '#3b82f6', 'LW');
+
+                // Check if points are in envelope
+                const isPointInEnvelope = (p) => {
+                    const x = p.arm;
+                    const y = p.weight;
+                    let isInside = false;
+                    for (let i = 0, j = envelopePoints.length - 1; i < envelopePoints.length; j = i++) {
+                        const xi = envelopePoints[i].cg, yi = envelopePoints[i].weight;
+                        const xj = envelopePoints[j].cg, yj = envelopePoints[j].weight;
+                        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                        if (intersect) isInside = !isInside;
+                    }
+                    return isInside;
+                };
+                
+                const statusContainer = document.getElementById('cg-status-container');
+                statusContainer.innerHTML = '';
+                const checkStatus = (point, label) => {
+                    const isSafe = isPointInEnvelope(point);
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = `flex justify-between items-center p-2 rounded-md ${isSafe ? 'bg-green-800/30' : 'bg-red-800/30'}`;
+                    statusDiv.innerHTML = `<span class="${isSafe ? 'text-green-400' : 'text-red-400'} font-semibold">${label} Status:</span> <span class="font-bold">${isSafe ? 'Safe' : 'OUT OF CG'}</span>`;
+                    statusContainer.appendChild(statusDiv);
+                };
+
+                checkStatus(mfc, 'MFC');
+                checkStatus(tow, 'TOW');
+                checkStatus(lw, 'LW');
+            };
+
+            // Add scroll listener for header
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('app-header');
+                if (window.scrollY > 10) {
+                    header.classList.add('header-scrolled');
+                } else {
+                    header.classList.remove('header-scrolled');
+                }
+            });
+
+            inputs.forEach(input => input.addEventListener('input', calculateAll));
+            seatInputs.forEach(input => input.addEventListener('input', calculateAll));
+
+            calculateAll();
+        });
+    </script>
+
+</body>
+</html>
