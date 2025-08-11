@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bell 412 EP PK-TWV Weight & Balance</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #10101E 0%, #161625 50%, #1C1C2D 100%);
@@ -22,7 +23,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .modern-input {
+        .modern-input, .modern-select {
             background: rgba(0, 0, 0, 0.5);
             border: 2px solid rgba(255, 215, 0, 0.3);
             transition: all 0.3s ease;
@@ -30,13 +31,25 @@
             -moz-appearance: textfield; /* Firefox */
         }
         
+        .modern-select {
+             -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFD700' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em 1em;
+            padding-right: 2.5rem;
+        }
+
+
         .modern-input::-webkit-outer-spin-button,
         .modern-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
-        .modern-input:focus {
+        .modern-input:focus, .modern-select:focus {
             background: rgba(0, 0, 0, 0.7);
             border-color: #FFD700;
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
@@ -50,11 +63,12 @@
         .floating-icon {
             animation: float 3s ease-in-out infinite;
         }
+
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
-        
+
         /* Glossy scrolled header */
         .header-scrolled {
             background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
@@ -62,22 +76,101 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
+
+        .action-button {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover {
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+         .action-button:disabled {
+            background: rgba(255, 215, 0, 0.05);
+            color: rgba(255, 215, 0, 0.4);
+            cursor: not-allowed;
+        }
+
+        /* Styles for the hidden PDF layout */
+        #pdf-layout {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 210mm; /* A4 width */
+            background: #ffffff;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            padding: 15mm;
+            font-size: 9pt;
+        }
+        #pdf-layout h1 { font-size: 20pt; font-weight: bold; text-align: center; color: #1a202c; margin-bottom: 10mm; line-height: 1.2; }
+        #pdf-layout h2 { font-size: 14pt; font-weight: bold; margin-top: 8mm; margin-bottom: 4mm; border-bottom: 1.5px solid #1a202c; padding-bottom: 2mm; color: #2d3748; }
+        #pdf-layout table { width: 100%; border-collapse: collapse; margin-top: 4mm; page-break-inside: auto; }
+        #pdf-layout tr { page-break-inside: avoid; page-break-after: auto; }
+        #pdf-layout th, #pdf-layout td { border: 1px solid #cccccc; padding: 1.5mm; text-align: left; }
+        #pdf-layout th { background-color: #f2f2f2; font-weight: bold; }
+        #pdf-layout .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+        #pdf-layout .summary-item { background-color: #f9f9f9; padding: 2.5mm; border: 1px solid #e2e8f0; border-radius: 4px; display: flex; justify-content: space-between; }
+        #pdf-layout .summary-item .label { font-weight: bold; color: #4a5568; }
+        #pdf-layout .summary-item .value { font-weight: bold; color: #1a202c; }
+        #pdf-layout #pdf-chart-container { margin-top: 8mm; page-break-inside: avoid; }
+        #pdf-layout .total-row { background-color: #e2e8f0; font-weight: bold; }
+        #pdf-signature-section { margin-top: 20mm; }
     </style>
 </head>
 <body class="p-4">
 
-    <div class="max-w-xl w-full mx-auto">
+    <div id="report-container" class="max-w-xl w-full mx-auto">
         <!-- Header Section -->
         <header id="app-header" class="sticky top-0 z-50 py-4 transition-all duration-300 -mx-4 px-4">
             <div class="text-center">
-                <div class="floating-icon text-5xl mb-2 inline-block">🚁</div>
-                <h1 class="text-3xl font-bold text-white">Bell 412 EP PK-TWV</h1>
-                <p class="text-yellow-400/80 font-medium">Weight & Balance Calculator</p>
-                <p class="text-white/50 text-xs font-medium mt-1">Made by Capt. Ramdan / Siera 7315</p>
+                <div class="floating-icon text-5xl mb-4 inline-block">🚁</div>
+                <h1 class="text-2xl font-bold text-white tracking-wide">PT. Transwisata Prima Aviation</h1>
+                <p class="text-lg text-yellow-400/80 font-medium">Load Sheet Bell 412 EP PK-TWV</p>
+                <div class="w-1/3 mx-auto mt-3 mb-3 border-b border-yellow-400/30"></div>
+                <p class="text-white/50 text-xs font-medium">Made by Capt. Ramdan / Siera 7315</p>
             </div>
         </header>
 
         <main class="space-y-6 mt-6">
+
+            <!-- Crew Information Card -->
+            <div class="modern-card rounded-2xl p-6">
+                <h2 class="font-bold text-white mb-4 text-lg flex items-center">
+                    <span class="w-3 h-3 bg-green-400 rounded-full mr-3"></span>
+                    Crew Information
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">👨‍✈️ PIC Name</label>
+                        <select id="picName" class="modern-select w-full p-3 rounded-lg font-bold text-base">
+                            <option>Capt. Marcelino B/ATPL H 4798</option>
+                            <option>Capt. S. Teddy P/ATPL H 5753</option>
+                            <option>Capt. M. Ramdani M/ATPL H 20-0007</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">👨‍✈️ SIC Name</label>
+                        <select id="sicName" class="modern-select w-full p-3 rounded-lg font-bold text-base">
+                            <option>Capt. Marcelino B/ATPL H 4798</option>
+                            <option>Capt. S. Teddy P/ATPL H 5753</option>
+                            <option>Capt. M. Ramdani M/ATPL H 20-0007</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-semibold text-green-400 mb-1">👷‍♂️ Engineer 1</label>
+                        <select id="engineerName" class="modern-select w-full p-3 rounded-lg font-bold text-base">
+                            <option>Yanu Prihatno</option>
+                            <option>Bayu Nugroho</option>
+                            <option>Wahyudi Suseno</option>
+                            <option>Sigit Hardadi</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <!-- Density Altitude Calculator Card -->
             <div class="modern-card rounded-2xl p-6">
                 <h2 class="font-bold text-white mb-4 text-lg flex items-center">
@@ -132,7 +225,7 @@
                             <input type="number" id="pilotWeight" value="90" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1">👨‍✈️ Co-pilot (kg)</label>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1"> ‍✈️ Co-pilot (kg)</label>
                             <input type="number" id="copilotWeight" value="90" class="modern-input w-full p-2 rounded-lg font-medium text-sm">
                         </div>
                         <div>
@@ -145,7 +238,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Flight Time Calculation Section -->
                 <div class="pt-4 border-b border-gray-700/50 pb-4">
                      <h3 class="font-bold text-white mb-3 text-md flex items-center">
@@ -216,7 +309,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Seat Layout & CG Table Card -->
             <div class="modern-card rounded-2xl p-6">
                 <h2 class="font-bold text-white mb-4 text-lg flex items-center">
@@ -271,7 +364,7 @@
                              <div><input type="number" placeholder="kg" class="seat-input modern-input w-12 h-10 text-center rounded-md" data-seat="12"><div class="text-xs text-gray-400 mt-1">12</div></div>
                         </div>
                     </div>
-
+                    
                     <!-- Baggage Section -->
                      <div class="text-center text-xs font-bold text-yellow-400 mb-2">TAIL SECTION</div>
                      <div class="relative h-8 w-full bg-gray-700 rounded-lg overflow-hidden border border-gray-600">
@@ -281,7 +374,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Payload Information -->
                 <div class="mt-4 pt-4 border-t border-gray-700/50">
                      <h3 class="font-bold text-white mb-3 text-md flex items-center">
@@ -356,15 +449,43 @@
                     </div>
                      <p class="text-xs mt-1" id="status-desc"></p>
                 </div>
+                <!-- Action Buttons -->
+                <div class="pt-4 border-t border-gray-700/50">
+                    <button id="pdf-button" class="w-full action-button p-3 rounded-lg font-semibold flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+                        Convert to PDF
+                    </button>
+                </div>
             </div>
         </main>
+    </div>
+
+    <!-- Hidden layout for PDF generation -->
+    <div id="pdf-layout">
+        <h1 id="pdf-title">PT. Transwisata Prima Aviation<br><span style="font-size: 14pt; font-weight: normal;">Load Sheet Bell 412 EP PK-TWV</span></h1>
+        <div id="pdf-crew-info"></div>
+        <div class="summary-grid" id="pdf-summary-grid">
+            <!-- Summary items will be populated by JS -->
+        </div>
+        <h2>Flight Time Calculation</h2>
+        <div class="summary-grid" id="pdf-flight-time-grid">
+            <!-- Flight time items will be populated by JS -->
+        </div>
+        <div id="pdf-fuel-required-container">
+            <!-- Fuel required items will be populated by JS -->
+        </div>
+        <h2>Weight & CG Calculation</h2>
+        <table id="pdf-cg-table"></table>
+        <h2>Center of Gravity Envelope</h2>
+        <div id="pdf-chart-container"></div>
+        <div id="pdf-signature-section"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const inputs = document.querySelectorAll('input[type="number"]');
             const seatInputs = document.querySelectorAll('.seat-input');
-            
+
             const momentTables = {
                 pilot: { 100: 4700, 110: 5170, 120: 5640, 130: 6110, 140: 6580, 150: 7050, 160: 7520, 170: 7990, 180: 8460, 190: 8930, 200: 9400, 210: 9870, 220: 10340 },
                 copilot: { 100: 4700, 110: 5170, 120: 5640, 130: 6110, 140: 6580, 150: 7050, 160: 7520, 170: 7990, 180: 8460, 190: 8930, 200: 9400, 210: 9870, 220: 10340 },
@@ -393,11 +514,11 @@
                 document.getElementById('pilotSeatDisplay').textContent = pilotKg;
                 document.getElementById('copilotSeatDisplay').textContent = copilotKg;
                 document.getElementById('engineerSeatDisplay').textContent = engineerKg;
-                
+
                 const maxBaggage = 200;
                 const baggageFill = document.getElementById('baggageFill');
                 const baggageDisplay = document.getElementById('baggageDisplay');
-                
+                                
                 const baggagePercent = Math.min((baggageKg / maxBaggage) * 100, 100);
                 baggageFill.style.width = `${baggagePercent}%`;
                 baggageDisplay.textContent = `${baggageKg} kg / ${maxBaggage} kg`;
@@ -410,7 +531,7 @@
                     baggageFill.classList.add('from-yellow-600', 'to-yellow-400');
                 }
             };
-            
+
             const calculateDensityAltitude = () => {
                 const tempC = parseFloat(document.getElementById('temperature').value) || 0;
                 const pressureAlt = parseFloat(document.getElementById('pressureAltitude').value) || 0;
@@ -434,7 +555,7 @@
                 if (fuelConsumption > 0) maxRange = (fuelOnboard / fuelConsumption) * airspeed;
                 document.getElementById('maxRangeResult').textContent = `${Math.round(maxRange).toLocaleString()} nm`;
 
-                const fuelReserve = 12.5 * 20;
+                const fuelReserve = 12.5 * 20; 
                 const fuelContingency = fuelTrip * 0.10;
                 const fuelStartEngine = 125;
                 const fuelAirTaxi = 125;
@@ -445,7 +566,7 @@
                 document.getElementById('fuelStartEngineResult').textContent = `${Math.round(fuelStartEngine).toLocaleString()} lbs`;
                 document.getElementById('fuelAirTaxiResult').textContent = `${Math.round(fuelAirTaxi).toLocaleString()} lbs`;
                 document.getElementById('totalFuelRequiredResult').textContent = `${Math.round(totalFuelRequired).toLocaleString()} lbs`;
-                
+
                 return fuelTrip;
             };
 
@@ -454,6 +575,7 @@
                 const weights = Object.keys(table).map(Number).sort((a, b) => a - b);
                 if (weightLbs <= weights[0]) return table[weights[0]];
                 if (weightLbs >= weights[weights.length - 1]) return table[weights[weights.length - 1]];
+
                 let lowerWeight = weights[0], upperWeight = weights[weights.length - 1];
                 for (let i = 0; i < weights.length - 1; i++) {
                     if (weightLbs >= weights[i] && weightLbs < weights[i+1]) {
@@ -489,10 +611,13 @@
                 const emptyWeight = parseFloat(document.getElementById('emptyWeight').value) || 0;
                 items.push({name: 'Empty Weight', weight: emptyWeight, moment: emptyWeight * 140.2});
                 items.push({name: 'Oil', weight: 25, moment: 25 * 169.1});
+
                 const pilotWeightLbs = (parseFloat(document.getElementById('pilotWeight').value) || 0) * kgToLbs;
                 items.push({name: 'Pilot', weight: pilotWeightLbs, moment: getMomentFromTable(pilotWeightLbs, momentTables.pilot)});
+
                 const copilotWeightLbs = (parseFloat(document.getElementById('copilotWeight').value) || 0) * kgToLbs;
                 items.push({name: 'Co-Pilot', weight: copilotWeightLbs, moment: getMomentFromTable(copilotWeightLbs, momentTables.copilot)});
+
                 const engineerWeightLbs = (parseFloat(document.getElementById('engineerWeight').value) || 0) * kgToLbs;
                 items.push({name: 'Seat 11 (Engineer)', weight: engineerWeightLbs, moment: getMomentFromTable(engineerWeightLbs, momentTables.seats11_12)});
 
@@ -521,7 +646,7 @@
                 addRowToTable(tableFoot, 'Basic Operating Weight (BOW)', bowWeight, bowMoment, true, 'bg-teal-800/30');
 
                 const fuelOnboard = parseFloat(document.getElementById('fuelOnboard').value) || 0;
-                const takeoffFuelWeight = Math.max(0, fuelOnboard - 100);
+                const takeoffFuelWeight = Math.max(0, fuelOnboard - 100); 
                 const takeoffFuelMoment = getMomentFromTable(takeoffFuelWeight, momentTables.fuel);
                 addRowToTable(tableFoot, 'Takeoff Fuel', takeoffFuelWeight, takeoffFuelMoment);
 
@@ -611,7 +736,8 @@
                     text.textContent = weight.toLocaleString();
                     chart.appendChild(text);
                 }
-                 for (let cg = cgMin; cg <= cgMax; cg++) {
+                
+                for (let cg = cgMin; cg <= cgMax; cg++) {
                     const x = xScale(cg);
                     const line = document.createElementNS(svgNS, 'line');
                     line.setAttribute('x1', x);
@@ -630,7 +756,7 @@
                     text.textContent = cg;
                     chart.appendChild(text);
                 }
-
+                
                 // Axis Titles
                 const yAxisTitle = document.createElementNS(svgNS, 'text');
                 yAxisTitle.setAttribute('transform', `rotate(-90)`);
@@ -726,12 +852,199 @@
                 }
             });
 
+            const showTemporaryMessage = (message, isError = false) => {
+                const msgBox = document.createElement('div');
+                msgBox.style.position = 'fixed';
+                msgBox.style.bottom = '20px';
+                msgBox.style.left = '50%';
+                msgBox.style.transform = 'translateX(-50%)';
+                msgBox.style.padding = '12px 24px';
+                msgBox.style.background = isError ? 'linear-gradient(135deg, #581c1c, #991b1b)' : 'linear-gradient(135deg, #064e3b, #15803d)';
+                msgBox.style.color = 'white';
+                msgBox.style.borderRadius = '8px';
+                msgBox.style.zIndex = '1000';
+                msgBox.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
+                msgBox.style.border = isError ? '1px solid #dc2626' : '1px solid #22c55e';
+                msgBox.textContent = message;
+                document.body.appendChild(msgBox);
+                setTimeout(() => {
+                    msgBox.style.transition = 'opacity 0.5s ease';
+                    msgBox.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(msgBox)) {
+                            document.body.removeChild(msgBox);
+                        }
+                    }, 500);
+                }, 3000);
+            };
+
+            const populatePdfLayout = () => {
+                 const pdfCrewInfo = document.getElementById('pdf-crew-info');
+                pdfCrewInfo.innerHTML = `
+                    <h2>Crew Information</h2>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="label">PIC Name</span>
+                            <span class="value">${document.getElementById('picName').value}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">SIC Name</span>
+                            <span class="value">${document.getElementById('sicName').value}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Engineer 1</span>
+                            <span class="value">${document.getElementById('engineerName').value}</span>
+                        </div>
+                    </div>
+                `;
+
+                const summaryGrid = document.getElementById('pdf-summary-grid');
+                summaryGrid.innerHTML = `
+                    <div class="summary-item">
+                        <span class="label">Takeoff Weight</span>
+                        <span class="value">${document.getElementById('finalTakeoffWeightResult').textContent}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Status</span>
+                        <span class="value">${document.getElementById('status-text').textContent}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Available Payload</span>
+                        <span class="value">${document.getElementById('status-payload').textContent}</span>
+                    </div>
+                     <div class="summary-item">
+                        <span class="label">Density Altitude</span>
+                        <span class="value">${document.getElementById('densityAltitudeResult').textContent}</span>
+                    </div>
+                `;
+                
+                const cgTable = document.getElementById('cg-table-body').cloneNode(true);
+                const cgTableFoot = document.getElementById('cg-table-foot').cloneNode(true);
+                const pdfCgTable = document.getElementById('pdf-cg-table');
+                pdfCgTable.innerHTML = '<thead>' + document.querySelector('#cg-table-body').parentElement.querySelector('thead').innerHTML + '</thead>';
+                pdfCgTable.appendChild(cgTable);
+                pdfCgTable.appendChild(cgTableFoot);
+
+                const chartSVG = document.getElementById('cg-chart').cloneNode(true);
+                const pdfChartContainer = document.getElementById('pdf-chart-container');
+                pdfChartContainer.innerHTML = '';
+                pdfChartContainer.appendChild(chartSVG);
+
+                // Populate Flight Time & Fuel Required for PDF
+                const pdfFlightTimeGrid = document.getElementById('pdf-flight-time-grid');
+                pdfFlightTimeGrid.innerHTML = '';
+                const flightTimeData = {
+                    "Trip Time": `${document.getElementById('tripHours').value}h ${document.getElementById('tripMinutes').value}m`,
+                    "Fuel Onboard": document.getElementById('fuelOnboard').value + ' lbs',
+                    "Fuel Consumption": document.getElementById('fuelConsumption').value + ' lbs/hr',
+                    "Airspeed": document.getElementById('airspeed').value + ' kts',
+                    "Fuel for Trip": document.getElementById('fuelTripResult').textContent,
+                    "Maximum Range": document.getElementById('maxRangeResult').textContent
+                };
+                for (const [key, value] of Object.entries(flightTimeData)) {
+                    pdfFlightTimeGrid.innerHTML += `<div class="summary-item"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                }
+
+                const pdfFuelRequiredContainer = document.getElementById('pdf-fuel-required-container');
+                pdfFuelRequiredContainer.innerHTML = '<h2>Fuel Required</h2><div class="summary-grid"></div>';
+                const pdfFuelRequiredGrid = pdfFuelRequiredContainer.querySelector('.summary-grid');
+                const fuelRequiredData = {
+                    "Fuel Reserve (20 min)": document.getElementById('fuelReserveResult').textContent,
+                    "Fuel Contingency (10%)": document.getElementById('fuelContingencyResult').textContent,
+                    "Fuel Start Engine": document.getElementById('fuelStartEngineResult').textContent,
+                    "Fuel Air Taxi": document.getElementById('fuelAirTaxiResult').textContent,
+                };
+                 for (const [key, value] of Object.entries(fuelRequiredData)) {
+                    pdfFuelRequiredGrid.innerHTML += `<div class="summary-item"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+                }
+                pdfFuelRequiredContainer.innerHTML += `<div class="summary-item total-row" style="grid-column: 1 / -1;"><span class="label">Total Fuel Required</span><span class="value">${document.getElementById('totalFuelRequiredResult').textContent}</span></div>`;
+                
+                // Add Signature Section
+                const pdfSignatureSection = document.getElementById('pdf-signature-section');
+                const picName = document.getElementById('picName').value;
+                pdfSignatureSection.innerHTML = `
+                    <div style="text-align: right; margin-top: 20mm;">
+                        <div style="display: inline-block; text-align: center;">
+                            <p style="margin-bottom: 20mm;">PIC Signature</p>
+                            <p style="border-top: 1px solid #000; padding-top: 2mm;">${picName}</p>
+                        </div>
+                    </div>
+                `;
+            };
+
+            const pdfButton = document.getElementById('pdf-button');
+            pdfButton.addEventListener('click', () => {
+                const originalButtonText = pdfButton.innerHTML;
+                pdfButton.disabled = true;
+                pdfButton.innerHTML = 'Generating...';
+
+                populatePdfLayout();
+                const pdfLayoutElement = document.getElementById('pdf-layout');
+
+                html2canvas(pdfLayoutElement, {
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    windowWidth: pdfLayoutElement.scrollWidth,
+                    windowHeight: pdfLayoutElement.scrollHeight
+                }).then(canvas => {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+                    const ratio = canvasHeight / canvasWidth;
+
+                    const imgWidth = pdfWidth; 
+                    const imgHeight = imgWidth * ratio;
+                    
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+
+                    while (heightLeft > 0) {
+                        position = -heightLeft;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pdfHeight;
+                    }
+                    
+                    const pageCount = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(150);
+                        pdf.text(
+                            `Page ${i} of ${pageCount}`,
+                            pdf.internal.pageSize.getWidth() / 2,
+                            pdf.internal.pageSize.getHeight() - 10,
+                            { align: 'center' }
+                        );
+                    }
+
+                    pdf.save('Load_Sheet_Bell_412_EP_PK_TWV.pdf');
+                    showTemporaryMessage('PDF berhasil dibuat!');
+
+                }).catch(err => {
+                    console.error("PDF generation failed:", err);
+                    showTemporaryMessage('Gagal membuat PDF. Silakan coba lagi.', true);
+                }).finally(() => {
+                    pdfButton.disabled = false;
+                    pdfButton.innerHTML = originalButtonText;
+                });
+            });
+
             inputs.forEach(input => input.addEventListener('input', calculateAll));
             seatInputs.forEach(input => input.addEventListener('input', calculateAll));
 
             calculateAll();
         });
     </script>
-
 </body>
 </html>
