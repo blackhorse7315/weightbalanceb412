@@ -108,7 +108,7 @@
         .pdf-section {
             margin-bottom: 5mm;
         }
-        #pdf-layout h1 { font-size: 20pt; font-weight: bold; text-align: center; color: #1a202c; margin-bottom: 10mm; line-height: 1.2; }
+        #pdf-layout h1 { font-size: 16pt; font-weight: bold; text-align: center; color: #1a202c; margin-bottom: 10mm; line-height: 1.2; }
         #pdf-layout h2 { font-size: 14pt; font-weight: bold; margin-top: 8mm; margin-bottom: 4mm; border-bottom: 1.5px solid #1a202c; padding-bottom: 2mm; color: #2d3748; }
         #pdf-layout table { width: 100%; border-collapse: collapse; margin-top: 4mm; }
         #pdf-layout th, #pdf-layout td { border: 1px solid #cccccc; padding: 1.5mm; text-align: left; }
@@ -169,6 +169,22 @@
                             <option>Wahyudi Suseno</option>
                             <option>Sigit Hardadi</option>
                         </select>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">🛫 From</label>
+                        <input type="text" id="fromLocation" class="modern-input w-full p-3 rounded-lg font-bold text-base" placeholder="WIHH">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">🛬 Destination</label>
+                        <input type="text" id="destination" class="modern-input w-full p-3 rounded-lg font-bold text-base" placeholder="WAHS">
+                    </div>
+                     <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">📅 Date of Mission</label>
+                        <input type="date" id="missionDate" class="modern-input w-full p-3 rounded-lg font-bold text-base">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-green-400 mb-1">👥 Total Person on Board</label>
+                        <input type="number" id="totalPob" class="modern-input w-full p-3 rounded-lg font-bold text-base" placeholder="e.g. 12">
                     </div>
                 </div>
             </div>
@@ -313,7 +329,7 @@
             </div>
 
             <!-- Seat Layout & CG Table Card -->
-            <div class="modern-card rounded-2xl p-6">
+            <div id="seat-layout-card" class="modern-card rounded-2xl p-6">
                 <h2 class="font-bold text-white mb-4 text-lg flex items-center">
                     <span class="w-3 h-3 bg-purple-400 rounded-full mr-3"></span>
                     Seat Layout & CG Calculation
@@ -465,17 +481,17 @@
     <!-- Hidden layout for PDF generation -->
     <div id="pdf-layout">
         <div class="pdf-section">
-            <h1 id="pdf-title">PT. Transwisata Prima Aviation<br><span style="font-size: 14pt; font-weight: normal;">Load Sheet Bell 412 EP PK-TWV</span></h1>
+            <h1 id="pdf-title">PT. Transwisata Prima Aviation<br><span style="font-size: 11pt; font-weight: normal;">Load Sheet Bell 412 EP PK-TWV</span></h1>
         </div>
         <div class="pdf-section" id="pdf-crew-info-container"></div>
-        <div class="pdf-section" id="pdf-summary-container">
-            <div class="summary-grid" id="pdf-summary-grid"></div>
-        </div>
+        <div class="pdf-section" id="pdf-flight-details-container"></div>
+        <div class="pdf-section" id="pdf-summary-container"></div>
         <div class="pdf-section" id="pdf-flight-time-container">
             <h2>Flight Time Calculation</h2>
             <div class="summary-grid" id="pdf-flight-time-grid"></div>
         </div>
         <div class="pdf-section" id="pdf-fuel-required-container"></div>
+         <div class="pdf-section" id="pdf-seat-layout-container"></div>
         <div class="pdf-section" id="pdf-cg-table-container">
             <h2>Weight & CG Calculation</h2>
             <table id="pdf-cg-table"></table>
@@ -493,6 +509,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const inputs = document.querySelectorAll('input[type="number"]');
             const seatInputs = document.querySelectorAll('.seat-input');
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('missionDate').value = today;
 
             const momentTables = {
                 pilot: { 100: 4700, 110: 5170, 120: 5640, 130: 6110, 140: 6580, 150: 7050, 160: 7520, 170: 7990, 180: 8460, 190: 8930, 200: 9400, 210: 9870, 220: 10340 },
@@ -887,7 +907,6 @@
             };
 
             const populatePdfLayout = () => {
-                // Crew Info
                 const pdfCrewInfoContainer = document.getElementById('pdf-crew-info-container');
                 pdfCrewInfoContainer.innerHTML = `
                     <h2>Crew Information</h2>
@@ -907,28 +926,58 @@
                     </div>
                 `;
 
-                // Summary Grid
-                const summaryGrid = document.getElementById('pdf-summary-grid');
-                summaryGrid.innerHTML = `
-                    <div class="summary-item">
-                        <span class="label">Takeoff Weight</span>
-                        <span class="value">${document.getElementById('finalTakeoffWeightResult').textContent}</span>
+                const pdfFlightDetailsContainer = document.getElementById('pdf-flight-details-container');
+                 pdfFlightDetailsContainer.innerHTML = `
+                    <h2>Flight Details</h2>
+                    <div class="summary-grid">
+                         <div class="summary-item">
+                            <span class="label">From</span>
+                            <span class="value">${document.getElementById('fromLocation').value || 'N/A'}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Destination</span>
+                            <span class="value">${document.getElementById('destination').value || 'N/A'}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Date of Mission</span>
+                            <span class="value">${document.getElementById('missionDate').value || 'N/A'}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Total Person on Board</span>
+                            <span class="value">${document.getElementById('totalPob').value || 'N/A'}</span>
+                        </div>
                     </div>
-                    <div class="summary-item">
-                        <span class="label">Status</span>
-                        <span class="value">${document.getElementById('status-text').textContent}</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="label">Available Payload</span>
-                        <span class="value">${document.getElementById('status-payload').textContent}</span>
-                    </div>
-                     <div class="summary-item">
-                        <span class="label">Density Altitude</span>
-                        <span class="value">${document.getElementById('densityAltitudeResult').textContent}</span>
+                `;
+
+                const pdfSummaryContainer = document.getElementById('pdf-summary-container');
+                pdfSummaryContainer.innerHTML = `
+                    <h2>Flight Summary</h2>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="label">Takeoff Weight</span>
+                            <span class="value">${document.getElementById('finalTakeoffWeightResult').textContent}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Status</span>
+                            <span class="value">${document.getElementById('status-text').textContent}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Available Payload</span>
+                            <span class="value">${document.getElementById('status-payload').textContent}</span>
+                        </div>
+                         <div class="summary-item">
+                            <span class="label">Density Altitude</span>
+                            <span class="value">${document.getElementById('densityAltitudeResult').textContent}</span>
+                        </div>
                     </div>
                 `;
                 
-                // CG Table
+                const pdfSeatLayoutContainer = document.getElementById('pdf-seat-layout-container');
+                const originalSeatLayout = document.getElementById('seat-layout-card').querySelector('.bg-gray-900\\/50').cloneNode(true);
+                pdfSeatLayoutContainer.innerHTML = '<h2>Seat Layout</h2>';
+                pdfSeatLayoutContainer.appendChild(originalSeatLayout);
+
+
                 const cgTable = document.getElementById('cg-table-body').cloneNode(true);
                 const cgTableFoot = document.getElementById('cg-table-foot').cloneNode(true);
                 const pdfCgTable = document.getElementById('pdf-cg-table');
@@ -936,13 +985,11 @@
                 pdfCgTable.appendChild(cgTable);
                 pdfCgTable.appendChild(cgTableFoot);
 
-                // CG Chart
                 const chartSVG = document.getElementById('cg-chart').cloneNode(true);
                 const pdfChartContainer = document.getElementById('pdf-chart-container');
                 pdfChartContainer.innerHTML = '';
                 pdfChartContainer.appendChild(chartSVG);
 
-                // Flight Time
                 const pdfFlightTimeGrid = document.getElementById('pdf-flight-time-grid');
                 pdfFlightTimeGrid.innerHTML = '';
                 const flightTimeData = {
@@ -957,7 +1004,6 @@
                     pdfFlightTimeGrid.innerHTML += `<div class="summary-item"><span class="label">${key}</span><span class="value">${value}</span></div>`;
                 }
 
-                // Fuel Required
                 const pdfFuelRequiredContainer = document.getElementById('pdf-fuel-required-container');
                 pdfFuelRequiredContainer.innerHTML = '<h2>Fuel Required</h2><div class="summary-grid"></div>';
                 const pdfFuelRequiredGrid = pdfFuelRequiredContainer.querySelector('.summary-grid');
@@ -972,14 +1018,13 @@
                 }
                 pdfFuelRequiredContainer.innerHTML += `<div class="summary-item total-row" style="grid-column: 1 / -1;"><span class="label">Total Fuel Required</span><span class="value">${document.getElementById('totalFuelRequiredResult').textContent}</span></div>`;
                 
-                // Add Signature Section
                 const pdfSignatureSection = document.getElementById('pdf-signature-section');
                 const picName = document.getElementById('picName').value;
                 pdfSignatureSection.innerHTML = `
-                    <div style="text-align: right; margin-top: 20mm;">
+                    <div style="text-align: right;">
                         <div style="display: inline-block; text-align: center;">
                             <p style="margin-bottom: 20mm;">PIC Signature</p>
-                            <p style="border-top: 1px solid #000; padding-top: 2mm;">${picName}</p>
+                            <p style="border-bottom: 1px solid #000; padding-bottom: 2mm;">${picName}</p>
                         </div>
                     </div>
                 `;
@@ -993,37 +1038,31 @@
 
                 try {
                     populatePdfLayout();
-                    const pdfLayoutElement = document.getElementById('pdf-layout');
                     
                     const { jsPDF } = window.jspdf;
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
                     const margin = 15;
+                    const contentWidth = pdfWidth - (margin * 2);
                     let y = margin;
-                    
-                    const sections = pdfLayoutElement.querySelectorAll('.pdf-section');
+
+                    const sections = document.querySelectorAll('#pdf-layout .pdf-section');
 
                     for (const section of sections) {
                         if (section.innerHTML.trim() === '') continue;
 
-                        const canvas = await html2canvas(section, {
-                            scale: 2,
-                            useCORS: true,
-                            logging: false
-                        });
-                        
+                        const canvas = await html2canvas(section, { scale: 2, useCORS: true, logging: false });
                         const imgData = canvas.toDataURL('image/png');
-                        const imgWidth = pdfWidth - (margin * 2);
-                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
                         if (y + imgHeight > pdfHeight - margin) {
                             pdf.addPage();
                             y = margin;
                         }
 
-                        pdf.addImage(imgData, 'PNG', margin, y, imgWidth, imgHeight);
-                        y += imgHeight + 5; 
+                        pdf.addImage(imgData, 'PNG', margin, y, contentWidth, imgHeight);
+                        y += imgHeight + 5;
                     }
 
                     const pageCount = pdf.internal.getNumberOfPages();
@@ -1031,12 +1070,7 @@
                         pdf.setPage(i);
                         pdf.setFontSize(8);
                         pdf.setTextColor(150);
-                        pdf.text(
-                            `Page ${i} of ${pageCount}`,
-                            pdfWidth / 2,
-                            pdfHeight - 10,
-                            { align: 'center' }
-                        );
+                        pdf.text(`Page ${i} of ${pageCount}`, pdfWidth / 2, pdfHeight - 10, { align: 'center' });
                     }
 
                     pdf.save('Load_Sheet_Bell_412_EP_PK_TWV.pdf');
