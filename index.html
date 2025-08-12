@@ -119,7 +119,7 @@
         #pdf-layout .summary-item .value { font-weight: bold; color: #1a202c; }
         #pdf-layout #pdf-chart-container { margin-top: 8mm; }
         #pdf-layout .total-row { background-color: #e2e8f0; font-weight: bold; }
-        #pdf-signature-section { margin-top: 20mm; }
+        #pdf-signature-section { margin-top: 20mm; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body class="p-4">
@@ -490,8 +490,9 @@
 
     <!-- Hidden layout for PDF generation -->
     <div id="pdf-layout">
-        <div class="pdf-section">
-            <h1 id="pdf-title">PT. Transwisata Prima Aviation<br><span style="font-size: 11pt; font-weight: normal;">Load Sheet Bell 412 EP PK-TWV</span></h1>
+        <div class="pdf-section" style="text-align: center;">
+            <h1 style="font-size: 16pt; font-weight: bold; color: #1a202c; margin: 0; padding: 0;">PT. Transwisata Prima Aviation</h1>
+            <p style="font-size: 11pt; font-weight: normal; border-bottom: 1px solid #1a202c; display: inline-block; padding-bottom: 2mm; margin-top: 2mm; margin-bottom: 10mm;">Load Sheet Bell 412 EP PK-TWV</p>
         </div>
         <div class="pdf-section" id="pdf-crew-info-container"></div>
         <div class="pdf-section" id="pdf-flight-details-container"></div>
@@ -1031,8 +1032,11 @@
                 const pdfSignatureSection = document.getElementById('pdf-signature-section');
                 const picName = document.getElementById('picName').value;
                 pdfSignatureSection.innerHTML = `
-                    <div style="text-align: right;">
-                        <div style="display: inline-block; text-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <p style="width: 60%; font-size: 8pt; text-align: justify; color: red;">
+                            I Certify That I Have Satisfied My Self That All Factors From The Basic Of Flight Preparation Laid Down By The Indonesia Civil Aviation As Covered In The Operation Manual of PT.Transwisata Prima Aviation
+                        </p>
+                        <div style="width: 35%; text-align: center;">
                             <p style="margin-bottom: 20mm;">PIC Signature</p>
                             <p style="border-bottom: 1px solid #000; padding-bottom: 2mm;">${picName}</p>
                         </div>
